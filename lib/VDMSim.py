@@ -55,7 +55,8 @@ def vdmScanSim(pdf, paramB1, paramB2, dx, dy, nSteps, isX):
     if isX:
         xAxisYields = dx[0] - dx[1]
         # we require an x-axis for fitting, this is given by the variable over which we step. In this case, a single variable is considered, might need to be reconsidered
-
+    else:
+        xAxisYields = dy[0] - dy[1]
 
 
     for i in range(nSteps):
@@ -72,9 +73,8 @@ def vdmScanSim(pdf, paramB1, paramB2, dx, dy, nSteps, isX):
 
         # anyway, integrate
         integral, err = integrate.dblquad(pdf, -30., 30., lambda x : -30., lambda x : 30., args=(paramB1, paramB2))
-        print(integral)
+        
         eventRate = np.random.poisson(800 * integral)
-        print(eventRate)
         vdmEventYields[i] = eventRate
     
     # change pdf to nominal
@@ -85,7 +85,7 @@ def vdmScanSim(pdf, paramB1, paramB2, dx, dy, nSteps, isX):
     paramB2[1] = 0
     totalEvents = np.sum(vdmEventYields)
     print(vdmEventYields / totalEvents)
-    plt.plot(xAxisYields, vdmEventYields / totalEvents)
+    plt.scatter(xAxisYields, vdmEventYields / totalEvents, label="VdM sim", s=10.)
 
     # fit two gauss to vdmEventYields
     # minimize diff betw gauss and vdmEventYields by changing parameters
@@ -99,7 +99,12 @@ def vdmScanSim(pdf, paramB1, paramB2, dx, dy, nSteps, isX):
 
     print(vdmPredicted / np.sum(vdmPredicted))
   
-    plt.plot(xAxisYields, vdmPredicted / np.sum(vdmPredicted))
+    plt.plot(xAxisYields, vdmPredicted / np.sum(vdmPredicted), label="fit", color='r')
+    plt.legend()
+
+    plt.xlabel(r"$\Delta$x [arbitrary units]")
+    plt.ylabel(r"Rate")
+    plt.savefig("testVDM.png")
     plt.show()
 
     print(totalEvents)
@@ -107,11 +112,3 @@ def vdmScanSim(pdf, paramB1, paramB2, dx, dy, nSteps, isX):
     # manage fit results
 
     return (totalEvents, chiSq)
-
-
-
-
-
-
-
-
