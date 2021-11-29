@@ -73,8 +73,9 @@ def vdmScanSim(pdf, paramB1, paramB2, dx, dy, nSteps, isX):
 
         # anyway, integrate
         integral, err = integrate.dblquad(pdf, -30., 30., lambda x : -30., lambda x : 30., args=(paramB1, paramB2))
-        
-        eventRate = np.random.poisson(800 * integral)
+        #print(integral)
+        #eventRate = np.random.poisson(800 * integral)
+        eventRate = np.random.normal(integral, scale = 2e-5)
         vdmEventYields[i] = eventRate
     
     # change pdf to nominal
@@ -84,8 +85,8 @@ def vdmScanSim(pdf, paramB1, paramB2, dx, dy, nSteps, isX):
     paramB2[0] = 0
     paramB2[1] = 0
     totalEvents = np.sum(vdmEventYields)
-    print(vdmEventYields / totalEvents)
-    plt.scatter(xAxisYields, vdmEventYields / totalEvents, label="VdM sim", s=10.)
+    #print(vdmEventYields / totalEvents)
+    plt.scatter(xAxisYields, vdmEventYields, label="VdM sim", s=10.)
 
     # fit two gauss to vdmEventYields
     # minimize diff betw gauss and vdmEventYields by changing parameters
@@ -93,22 +94,36 @@ def vdmScanSim(pdf, paramB1, paramB2, dx, dy, nSteps, isX):
 
     # fit sum of 2 gaussians to it
     paramOpt, cov = optimize.curve_fit(pdfs.oneDimDoubleGauss, xAxisYields, vdmEventYields / totalEvents, bounds=((-np.inf, -np.inf, -np.inf, -np.inf, 0.), (np.inf, np.inf, np.inf, np.inf, 1.)))
-
     vdmPredicted = pdfs.oneDimDoubleGauss(xAxisYields, paramOpt[0], paramOpt[1], paramOpt[2], paramOpt[3], paramOpt[4])
+
+    width = min(paramOpt[1],paramOpt[3])
+    #print (paramOpt[1])
+    #print (paramOpt[3])
+#
+    #print(paramOpt[4] ** 2 * paramOpt[1] + (1 - paramOpt[4]) ** 2 * paramOpt[3])
+
     chiSq = stats.chisquare(vdmEventYields / totalEvents, f_exp=vdmPredicted / np.sum(vdmPredicted))
 
-    print(vdmPredicted / np.sum(vdmPredicted))
-  
-    plt.plot(xAxisYields, vdmPredicted / np.sum(vdmPredicted), label="fit", color='r')
+    #paramOpt, cov = optimize.curve_fit(pdfs.oneDimGauss, xAxisYields, vdmEventYields / totalEvents, bounds=((-np.inf, -np.inf), (np.inf, np.inf)))
+    #vdmPredicted = pdfs.oneDimGauss(xAxisYields, paramOpt[0], paramOpt[1])
+
+    #print(vdmPredicted)
+    print(width)
+    plt.plot(xAxisYields, vdmPredicted * totalEvents, label="fit", color='r')
+    #plt.plot(xAxisYields, pdfs.oneDimGauss(xAxisYields, paramOpt[0], paramOpt[1]) * totalEvents, label="CompOne", color='g')
+    #plt.plot(xAxisYields, pdfs.oneDimGauss(xAxisYields, paramOpt[2], paramOpt[3]) * totalEvents, label="CompTwo", color='y')
+
     plt.legend()
 
     plt.xlabel(r"$\Delta$x [arbitrary units]")
     plt.ylabel(r"Rate")
+    plt.yscale("log")
+    plt.gca().set_ylim(bottom=0.3)
     plt.savefig("testVDM.png")
     plt.show()
 
-    print(totalEvents)
-    print(chiSq)
+    #print(totalEvents)
+    #print(chiSq)
     # manage fit results
 
-    return (totalEvents, chiSq)
+    return (totalEvents, chiSq, width)

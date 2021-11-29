@@ -34,7 +34,7 @@ def singleGaussBeam(args, grid):
 
     normFactor = 2 * np.pi * sigmaX * sigmaY * np.sqrt(1 - (corr * corr))
 
-    result = normFactor * np.exp(exponent)
+    result = (1/normFactor) * np.exp(exponent)
 
     return result
 
@@ -62,7 +62,7 @@ def singleGaussBeamNew(x, y, args):
 
     normFactor = 2 * np.pi * sigmaX * sigmaY * np.sqrt(1 - (corr * corr))
 
-    result = normFactor * np.exp(exponent)
+    result = (1 / normFactor) * np.exp(exponent)
 
     return result
 
@@ -77,3 +77,7 @@ def oneDimDoubleGauss(x, meanOne, stdDevOne, meanTwo, stdDevTwo, coeff):
     gaussTwo = stats.norm.pdf(x, loc=meanTwo, scale=stdDevTwo)
 
     return coeff * gaussOne + (1. - coeff) * gaussTwo
+
+def oneDimGauss(x, meanOne, stdDevOne):
+    gaussOne = stats.norm.pdf(x, loc=meanOne, scale=stdDevOne)
+    return gaussOne
