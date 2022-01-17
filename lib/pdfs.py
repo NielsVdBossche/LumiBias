@@ -47,16 +47,16 @@ def singleGaussBeamNew(x, y, args):
 
     corr = args[4]
 
-    x -= offsetX
-    x /= sigmaX
+    newX = x - offsetX
+    newX /= sigmaX
 
-    y -= offsetY
-    y /= sigmaY
+    newY = y - offsetY
+    newY /= sigmaY
 
-    corrTerm = 2 * corr * x * y
+    corrTerm = 2 * corr * newX * newY
 
-    exponent = corrTerm - np.multiply(x, x) - np.multiply(y, y)
-    preFactor = 1 * 0.5 / (1 - (corr * corr))
+    exponent = corrTerm - np.multiply(newX, newX) - np.multiply(newY, newY)
+    preFactor = 0.5 / (1 - (corr * corr))
 
     exponent *= preFactor
 

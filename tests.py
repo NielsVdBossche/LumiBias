@@ -1,6 +1,9 @@
+from math import pi
 import lib.VDMSim as vdm
 import lib.pdfs as pdfs
 import lib.truePdf as truepdfs
+import lib.jsonTools as jsonTools
+from scipy import integrate
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -53,9 +56,12 @@ def distrTestDoubleGauss(argsB1, argsB2):
 
     weight1 = argsB1[-1]
     weight2 = argsB2[-1]
-
+#
     distB1 = weight1 * pdfs.singleGaussBeam(argsB1[:5], gridB1) + (1-weight1) * pdfs.singleGaussBeam(argsB1[:2] + argsB1[5:-1], gridB1M)
     distB2 = weight2 * pdfs.singleGaussBeam(argsB2[:5], gridB2) + (1-weight2) * pdfs.singleGaussBeam(argsB2[:2] + argsB2[5:-1], gridB2M)
+
+    #distB1 = truepdfs.doubleGaussBeamCross()
+    #distB2 = truepdfs.doubleGaussBeamCross()
 
     fig, (beamOne, beamTwo, BeamMix) = plt.subplots(1, 3)
 
@@ -92,20 +98,28 @@ def gaussFuncTest():
 
 def vdmTest():
 
-    argsB1 = [0, 0, 3, 1, 0.9]
-    argsB2 = [0, 0, 1, 2, 0]
+    argsB1 = [0, 0, 1.978, 1.716, -0.073]
+    argsB2 = [0, 0, 1.802, 1.644, -0.058]
 
     distrTestGauss(argsB1, argsB2)
 
-    dxOne = np.linspace(-10., 10., num=25, endpoint=True)
-    dyOne = np.zeros(25)
+    dxOne = np.linspace(-20., 20., num=50, endpoint=True)
+    dyOne = np.zeros(50)
     dx = np.array([dxOne, dyOne])
     dy = np.array([dyOne, dyOne])
 
-    print(dx)
-    print(dy)
+    #print(dx)
+    #print(dy)
 
-    vdm.vdmScanSim(truepdfs.singleGaussBeamCrossIntegratable, argsB1, argsB2, dx, dy, 25, True)
+    xEv, xChiSq, xWidth = vdm.vdmScanSim(truepdfs.singleGaussBeamCrossIntegratable, argsB1, argsB2, dx, dy, 50, True)
+    yEv, yChiSq, yWidth = vdm.vdmScanSim(truepdfs.singleGaussBeamCrossIntegratable, argsB1, argsB2, dy, dx, 50, False)
+
+    area_VdM = 2 * pi * xWidth * yWidth
+
+    area_True, err = integrate.dblquad(truepdfs.singleGaussBeamCrossIntegratable, -30., 30., lambda x : -30., lambda x : 30., args=(argsB1, argsB2))
+
+    print(area_VdM)
+    print(1/area_True)
 
 
 def vdmTestDG():
@@ -113,27 +127,52 @@ def vdmTestDG():
     argsB1 = [0, 0, 1.978, 1.716, -0.073, 2.141, 2.13, -0.676, 0.940]
     argsB2 = [0, 0, 1.782, 1.641, -0.058, 1.834, 1.65, -0.057, 0.968]
 
+    nSteps = 25
 
-    distrTestDoubleGauss(argsB1, argsB2)
+    #distrTestDoubleGauss(argsB1, argsB2)
 
-    dxOne = np.linspace(-10., 10., num=25, endpoint=True)
-    dyOne = np.zeros(25)
+    dxOne = np.linspace(-12., 12., num=nSteps, endpoint=True)
+    dyOne = np.zeros(nSteps)
     dx = np.array([dxOne, dyOne])
     dy = np.array([dyOne, dyOne])
 
-    print(dx)
-    print(dy)
+    #print(dx)
+    #print(dy)
 
-    vdm.vdmScanSim(truepdfs.singleGaussBeamCrossIntegratable, argsB1, argsB2, dx, dy, 25, True)
+    xYields, xEv, xChiSq, xWidth = vdm.vdmScanSim(truepdfs.doubleGaussBeamCross, argsB1, argsB2, dx, dy, nSteps, True)
 
-    dyOne = np.linspace(-10., 10., num=25, endpoint=True)
-    dxOne = np.zeros(25)
+    file = jsonTools.openFile("Rates_HFOC_6016.json")
+    hfocData = jsonTools.getData(file)
+
+    plt.scatter(dx[0] - dx[1], xYields, label="VdM sim", s=10.)
+    plt.scatter(dx[0] - dx[1], hfocData, label="VdM data", s=10.)
+
+    plt.legend()
+
+    plt.xlabel(r"$\Delta$x [a.u.]")
+    plt.ylabel(r"Rate")
+    plt.yscale("log")
+    plt.grid(True, which="both")
+    plt.savefig("SimVData.png")
+    plt.show()
+
+    dyOne = np.linspace(-12., 12., num=nSteps, endpoint=True)
+    dxOne = np.zeros(nSteps)
     dy = np.array([dyOne, dxOne])
     dx = np.array([dxOne, dxOne])
 
-    vdm.vdmScanSim(truepdfs.singleGaussBeamCrossIntegratable, argsB1, argsB2, dx, dy, 25, False)
+    yYields, yEv, yChiSq, yWidth = vdm.vdmScanSim(truepdfs.doubleGaussBeamCross, argsB1, argsB2, dx, dy, nSteps, False)
 
     # same for dy now
+
+    area_VdM = 2 * pi * xWidth * yWidth
+
+    area_True, err = integrate.dblquad(truepdfs.doubleGaussBeamCross, -30., 30., lambda x : -30., lambda x : 30., args=(argsB1, argsB2))
+
+    print("VDM obtained area: {}".format(area_VdM))
+    print("True area: {}".format(1/area_True))
+
+    print ((area_VdM - 1/area_True) * area_True)
 
     
     # from fit results, get a total sigma x, sigma y for each distr and use these to get a futted xy area
@@ -142,5 +181,5 @@ if (__name__ == "__main__"):
     #distrTestGauss()
 
     #gaussFuncTest()
-
+    #vdmTest()
     vdmTestDG()

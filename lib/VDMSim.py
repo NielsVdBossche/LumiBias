@@ -51,12 +51,26 @@ def vdmScanSim(pdf, paramB1, paramB2, dx, dy, nSteps, isX):
 #
     #grid = np.meshgrid(xSpace, ySpace)
 
-
+    text = ""
     if isX:
         xAxisYields = dx[0] - dx[1]
+        text = r"$\Delta$x [arbitrary units]"
         # we require an x-axis for fitting, this is given by the variable over which we step. In this case, a single variable is considered, might need to be reconsidered
     else:
         xAxisYields = dy[0] - dy[1]
+
+        text = r"$\Delta$y [arbitrary units]"
+
+    
+    scaling = 1
+    paramB1[0] = 0
+    paramB1[1] = 0
+    paramB2[0] = 0
+    paramB2[1] = 0
+
+    integral, err = integrate.dblquad(pdf, -30., 30., lambda x : -30., lambda x : 30., args=(paramB1, paramB2))
+
+    scaling = integral / 0.00633
 
 
     for i in range(nSteps):
@@ -74,8 +88,8 @@ def vdmScanSim(pdf, paramB1, paramB2, dx, dy, nSteps, isX):
         # anyway, integrate
         integral, err = integrate.dblquad(pdf, -30., 30., lambda x : -30., lambda x : 30., args=(paramB1, paramB2))
         #print(integral)
-        #eventRate = np.random.poisson(800 * integral)
-        eventRate = np.random.normal(integral, scale = 2e-5)
+        #eventRate = np.random.poisson(8000 * integral)
+        eventRate = integral / scaling # np.random.normal(integral / scaling, scale = 2.242e-5)
         vdmEventYields[i] = eventRate
     
     # change pdf to nominal
@@ -86,7 +100,13 @@ def vdmScanSim(pdf, paramB1, paramB2, dx, dy, nSteps, isX):
     paramB2[1] = 0
     totalEvents = np.sum(vdmEventYields)
     #print(vdmEventYields / totalEvents)
-    plt.scatter(xAxisYields, vdmEventYields, label="VdM sim", s=10.)
+    #plt.scatter(xAxisYields, vdmEventYields, label="VdM sim", s=10.)
+    #plt.legend()
+    #plt.xlabel(text)
+    #plt.ylabel(r"Rate")
+#
+#
+    #plt.show()
 
     # fit two gauss to vdmEventYields
     # minimize diff betw gauss and vdmEventYields by changing parameters
@@ -95,12 +115,10 @@ def vdmScanSim(pdf, paramB1, paramB2, dx, dy, nSteps, isX):
     # fit sum of 2 gaussians to it
     paramOpt, cov = optimize.curve_fit(pdfs.oneDimDoubleGauss, xAxisYields, vdmEventYields / totalEvents, bounds=((-np.inf, -np.inf, -np.inf, -np.inf, 0.), (np.inf, np.inf, np.inf, np.inf, 1.)))
     vdmPredicted = pdfs.oneDimDoubleGauss(xAxisYields, paramOpt[0], paramOpt[1], paramOpt[2], paramOpt[3], paramOpt[4])
+    
+    #width = min(paramOpt[1],paramOpt[3])
+    width = 1 / (( (paramOpt[4] / paramOpt[1]) + ((1-paramOpt[4]) / paramOpt[3]) ))
 
-    width = min(paramOpt[1],paramOpt[3])
-    #print (paramOpt[1])
-    #print (paramOpt[3])
-#
-    #print(paramOpt[4] ** 2 * paramOpt[1] + (1 - paramOpt[4]) ** 2 * paramOpt[3])
 
     chiSq = stats.chisquare(vdmEventYields / totalEvents, f_exp=vdmPredicted / np.sum(vdmPredicted))
 
@@ -109,21 +127,23 @@ def vdmScanSim(pdf, paramB1, paramB2, dx, dy, nSteps, isX):
 
     #print(vdmPredicted)
     print(width)
+    plt.scatter(xAxisYields, vdmEventYields, label="VdM sim", s=10.)
+
+    plt.plot(xAxisYields, paramOpt[4] * pdfs.oneDimGauss(xAxisYields, paramOpt[0], paramOpt[1]) * totalEvents, label="CompOne", color='g')
+    plt.plot(xAxisYields, (1-paramOpt[4]) * pdfs.oneDimGauss(xAxisYields, paramOpt[2], paramOpt[3]) * totalEvents, label="CompTwo", color='y')
     plt.plot(xAxisYields, vdmPredicted * totalEvents, label="fit", color='r')
-    #plt.plot(xAxisYields, pdfs.oneDimGauss(xAxisYields, paramOpt[0], paramOpt[1]) * totalEvents, label="CompOne", color='g')
-    #plt.plot(xAxisYields, pdfs.oneDimGauss(xAxisYields, paramOpt[2], paramOpt[3]) * totalEvents, label="CompTwo", color='y')
 
     plt.legend()
 
-    plt.xlabel(r"$\Delta$x [arbitrary units]")
+    plt.xlabel(text)
     plt.ylabel(r"Rate")
     plt.yscale("log")
-    plt.gca().set_ylim(bottom=0.3)
+    #plt.gca().set_ylim(bottom=0.3)
     plt.savefig("testVDM.png")
     plt.show()
 
     #print(totalEvents)
-    #print(chiSq)
+    print("Chi square = {}".format(chiSq))
     # manage fit results
 
-    return (totalEvents, chiSq, width)
+    return (vdmEventYields, totalEvents, chiSq, width)
