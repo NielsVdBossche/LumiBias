@@ -2,7 +2,7 @@ import json
 import numpy as np
 
 def openFile(filename):
-    f = open("/home/njovdnbo/Documents/EPR/Lumi/lumiData/" + filename)
+    f = open("/home/njovdnbo/Documents/EPR/LumiBias/lumiData/" + filename)
     data = json.load(f)
 
     return data
@@ -43,3 +43,10 @@ def getData(data, axis="X"):
         ratesFinal.append(np.average(rates_list))     
 
     return ratesFinal
+
+def getXandYData(data):
+
+    xData = getData(data, axis="X")
+    yData = getData(data, axis="Y")
+
+    return (xData, yData)
