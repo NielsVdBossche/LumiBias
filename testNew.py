@@ -1,6 +1,6 @@
 import lib.beamPDFs as beamPDFs
 import lib.plotCode as plotCode
-from lib.VDMSim_Cleaned import RunVdmScanSim
+from lib.VDMSim import RunVdmScanSim
 from scipy import integrate
 import matplotlib.pyplot as plt
 
