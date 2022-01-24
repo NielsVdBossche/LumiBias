@@ -2,7 +2,6 @@ import math
 from lib.VDMSim import RunVdmScanSim
 import lib.beamPDFs as beamPDFs
 import lib.pdfs as pdfs
-import lib.truePdf as truepdfs
 import lib.jsonTools as jsonTools
 from scipy import integrate
 
