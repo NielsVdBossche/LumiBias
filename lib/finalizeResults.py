@@ -7,10 +7,6 @@ def areaCorrection(pdf, parameters, scanResults):
 
     dx, (xScan, yScan) = scanResults
 
-    print(area_True)
-    print("X:", xScan)
-    print("Y:", yScan)
-
     area_VdM_DG = 2 * np.pi * xScan[0] * yScan[0]
     area_VdM_SG = 2 * np.pi * xScan[4][1] * yScan[4][1]
 
