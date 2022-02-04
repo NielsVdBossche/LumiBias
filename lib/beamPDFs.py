@@ -1,5 +1,11 @@
 import numpy as np
 
+
+""" 
+Contains all beam density models. For the overlap, the easiest implementation for a function forwards to beamOverlap (see TripleGaussBeamOverlap).
+
+"""
+
 def SingleGaussBeam(y, x, beam):
     """
     beam: contains all parameters required to generate a single gaussian beam: 
@@ -37,14 +43,14 @@ def DoubleGaussBeam(y, x, beam):
 
 def tripleGaussBeam(y, x, beam):
     """
-    Beam: (x-mean, y-mean, x-width1, y-width1, correlation1, x-width2, y-width2, correlation2, x-width3, y-width3, correlation3, coeff1, coeff2)
+    Beam: (x-mean, y-mean, x-width1, y-width1, correlation1, x-width2, y-width2, correlation2, x-width3, y-width3, correlation3, theta, phi)
     """
     partOne = SingleGaussBeam(y, x, beam[:5])
     partTwo = SingleGaussBeam(y, x, np.concatenate((beam[:2], beam[5:8])))
     partThree = SingleGaussBeam(y, x, np.concatenate((beam[:2], beam[8:11])))
 
 
-    return beam[-2] * partOne + beam[-1] * partTwo + (1 - beam[-2] - beam[-1]) * partThree
+    return np.cos(beam[-2]) * np.sin(beam[-1]) * np.cos(beam[-2]) * np.sin(beam[-1]) * partOne + np.cos(beam[-2]) * np.cos(beam[-1]) * np.cos(beam[-2]) * np.cos(beam[-1]) * partTwo + np.sin(beam[-2]) * np.sin(beam[-2]) * partThree
 
 
 def SingleGaussBeamOverlap(y, x, beams):
@@ -78,5 +84,6 @@ def beamOverlap(y, x, beamFunc, beamParams):
 
     return beamOne * beamTwo
 
-
+def TripleGaussBeamOverlap(y, x, beams):
+    return beamOverlap(y, x, tripleGaussBeam, beams)
     

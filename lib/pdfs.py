@@ -81,3 +81,14 @@ def oneDimDoubleGauss(x, meanOne, stdDevOne, meanTwo, stdDevTwo, coeff):
 def oneDimGauss(x, meanOne, stdDevOne):
     gaussOne = stats.norm.pdf(x, loc=meanOne, scale=stdDevOne)
     return gaussOne
+
+
+def oneDimDoubleGaussAlt(x, parameters):
+    gaussOne = stats.norm.pdf(x, loc=parameters[0], scale=parameters[1])
+    gaussTwo = stats.norm.pdf(x, loc=parameters[2], scale=parameters[3])
+
+    return parameters[4] * gaussOne + (1. - parameters[4]) * gaussTwo
+
+def oneDimGaussAlt(x, parameters):
+    gaussOne = stats.norm.pdf(x, loc=parameters[0], scale=parameters[1])
+    return gaussOne
