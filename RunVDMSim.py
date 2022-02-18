@@ -19,13 +19,13 @@ def readGaussianBeamComponent(physParam, beamNmbr, beamType, name):
     return float(physParam[xw][name]) / 49.20, float(physParam[yw][name]) / 49.20, float(physParam[r][name]) #, float(physParam[comp][name])
 
 def readGaussian(model, physParam, names):
-    if "Single" in model: 
+    if "Single Gauss" == model: 
         physModel = beamPDFs.SingleGaussBeamOverlap
         types = ["N"]
-    elif "Double" in model: 
+    elif "Double Gauss" == model or model == "Super Gauss": 
         physModel = beamPDFs.DoubleGaussBeamOverlap
         types = ["N", "M"]
-    elif "Triple" in model: 
+    elif "Triple Gauss" == model or model == "Super Double Gauss": 
         physModel = beamPDFs.TripleGaussBeamOverlap
         types = ["N", "M", "W"]
 
@@ -33,11 +33,11 @@ def readGaussian(model, physParam, names):
     for i in range(1,3):
         beamComponents = np.zeros(2 + len(types) * 3 + len(types) - 1)
         for j, type in enumerate(types):
-            beamComponents[2+j:2+j+3] = readGaussianBeamComponent(physParam, i, type, names)
-
-            if "Double" in model:
-                comp = "w" + type + str(i)
-                beamComponents[- len(types) + 1 + j] = float(physParam[comp][names])
+            beamComponents[2+j*3:2+j*3+3] = readGaussianBeamComponent(physParam, i, type, names)
+            if not "Single" in model and j < len(types) - 1:
+                #if "Double" in model and type == "N":
+                comp = "w" + str(i) + type
+                beamComponents[- len(types) + 1 + j] = float(physParam[comp][names]) / 100
             #elif "Triple" in model:
 
         
