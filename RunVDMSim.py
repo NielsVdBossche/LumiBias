@@ -62,6 +62,31 @@ def readParameterFile(paramFile):
     
     return None
 
+def runVDMSimOnJSON(jsonFilePath):
+    # requires a JSON-file
+    f = open(jsonFilePath)
+    parameterFile = json.load(f)
+
+    model, parameters = readParameterFile(parameterFile)
+    
+    nSteps = 25
+
+    results = vdm.RunVdmScanSim(model, parameters, nSteps=nSteps)
+    sgBias, dgBias = res.areaCorrection(model, parameters, results)
+    
+    return sgBias, dgBias
+
+def runVDMSim(paramDict):
+    ## Same as runVDMSimOnJSON but just uses the dictionary that is written to the json file
+    model, parameters = readParameterFile(paramDict)
+    
+    nSteps = 25
+
+    results = vdm.RunVdmScanSim(model, parameters, nSteps=nSteps)
+    sgBias, dgBias = res.areaCorrection(model, parameters, results)
+    
+    return sgBias, dgBias
+
 
 
 if __name__ == "__main__":
@@ -70,7 +95,6 @@ if __name__ == "__main__":
     # load json file
     # general opening function for json, reads type of fit
     # type of fit then gets used to choose pdf
-
     f = open(parameterFileName)
     parameterFile = json.load(f)
 
