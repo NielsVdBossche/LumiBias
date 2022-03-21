@@ -50,7 +50,7 @@ def tripleGaussBeam(y, x, beam):
     partThree = SingleGaussBeam(y, x, np.concatenate((beam[:2], beam[8:11])))
 
 
-    return np.cos(beam[-2]) * np.sin(beam[-1]) * np.cos(beam[-2]) * np.sin(beam[-1]) * partOne + np.cos(beam[-2]) * np.cos(beam[-1]) * np.cos(beam[-2]) * np.cos(beam[-1]) * partTwo + np.sin(beam[-2]) * np.sin(beam[-2]) * partThree
+    return beam[-2] * partOne + beam[-1] * partTwo + (1 - beam[-2] - beam[-1]) * partThree
 
 
 def SingleGaussBeamOverlap(y, x, beams):

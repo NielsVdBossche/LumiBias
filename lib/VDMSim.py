@@ -25,7 +25,7 @@ def vdmLoop(pdf, beamParameters, beamPos, scaling, randomMode=1):
         beamParameters[1, 0] = offsets[2]
         beamParameters[1, 1] = offsets[3]
 
-        integral, err = integrate.dblquad(pdf, -30., 30., lambda x : -30., lambda x : 30., args=(beamParameters,))
+        integral, err = integrate.dblquad(pdf, -35., 35., lambda x : -35., lambda x : 35., args=(beamParameters,))
         eventYields[i] = np.random.normal(integral / scaling, scale = 0.005 * integral / scaling) if randomMode >= 1 else integral / scaling
     
 
@@ -38,12 +38,12 @@ def vdmScanSim(pdf, beamParameters, beamPos, scaling, axis=0):
     eventYield = vdmLoop(pdf, beamParameters, beamPos, scaling, randomMode=0)
 
     totalEventYield = np.sum(eventYield)
-
-    DGParam, cov = optimize.curve_fit(pdfs.oneDimDoubleGauss, beamPos[:, axis], eventYield / totalEventYield, bounds=((-np.inf, 1., -np.inf, 1., 0.), (np.inf, 8., np.inf, 8., 1.)))
+    # single gauss als first guess + force fit to be at 0 centered
+    DGParam, cov = optimize.curve_fit(pdfs.oneDimDoubleGauss, beamPos[:, axis], eventYield / totalEventYield, bounds=((-0.00001, 1.5, -0.00001, 1.5, 0.), (0.00001, 30., 0.00001, 30., 1.)))
     vdmPredicted = pdfs.oneDimDoubleGauss(beamPos[:, axis], DGParam[0], DGParam[1], DGParam[2], DGParam[3], DGParam[4])
     width = 1 / (( (DGParam[4] / DGParam[1]) + ((1-DGParam[4]) / DGParam[3]) ))
 
-    SGParam, cov = optimize.curve_fit(pdfs.oneDimGauss, beamPos[:, axis], eventYield / totalEventYield, bounds=((-np.inf, -np.inf), (np.inf, np.inf)))
+    SGParam, cov = optimize.curve_fit(pdfs.oneDimGauss, beamPos[:, axis], eventYield / totalEventYield, bounds=((-0.001, 1.5), (0.001, 30.)))
     
     chiSq = stats.chisquare(eventYield / totalEventYield, f_exp=vdmPredicted / np.sum(vdmPredicted))
 
