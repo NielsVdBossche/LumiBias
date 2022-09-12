@@ -1,6 +1,7 @@
 import lib.VDMSim as vdm
 import lib.beamPDFs as beamPDFs
 import lib.finalizeResults as res
+import lib.jsonOutput as jsonOutput
 import sys
 import numpy as np
 import json
@@ -62,7 +63,7 @@ def readParameterFile(paramFile):
     
     return None
 
-def runVDMSimOnJSON(jsonFilePath):
+def runVDMSimOnJSON(jsonFilePath, outputpath="res.npz"):
     # requires a JSON-file
     f = open(jsonFilePath)
     parameterFile = json.load(f)
@@ -74,6 +75,7 @@ def runVDMSimOnJSON(jsonFilePath):
     results = vdm.RunVdmScanSim(model, parameters, nSteps=nSteps)
     sgBias, dgBias = res.areaCorrection(model, parameters, results)
     
+    jsonOutput.write_output_as_npz(results, sgBias, dgBias, outputpath)
     return sgBias, dgBias
 
 def runVDMSim(paramDict):
@@ -85,6 +87,8 @@ def runVDMSim(paramDict):
     results = vdm.RunVdmScanSim(model, parameters, nSteps=nSteps)
     sgBias, dgBias = res.areaCorrection(model, parameters, results)
     
+    jsonOutput.write_output_as_npz(results, sgBias, dgBias)
+
     return sgBias, dgBias
 
 

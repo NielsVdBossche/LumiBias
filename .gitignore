@@ -53,6 +53,9 @@ venv/*
 
 BeamImagingAnalysis_JK/**
 
-Data/**
+Data**
 
-__pycache__/**.pyc
+lib/__pycache__/**
+
+**.npz
+InputVtx**

@@ -1,0 +1,26 @@
+xWidthN1	xWidthN2	yWidthN1	yWidthN2	rhoN1	rhoN2	w1N	w2N	xWidthM1	xWidthM2	yWidthM1	yWidthM2	rhoM1	rhoM2	w1M	w2M	xWidthW1	xWidthW2	yWidthW1	yWidthW2	rhoW1	rhoW2	w1W	w2W	xVtxRes	yVtxRes
+first	27.56µm
+±1.24µm	43.94µm
+±3.58µm	28.39µm
+±1.46µm	47.46µm
+±3.07µm	-0.036
+±0.064	-0.064
+±0.014	-4.757%
+±0.173%	-16.856%
+±2.607%	85.66µm
+±0.12µm	77.54µm
+±0.23µm	80.40µm
+±0.09µm	72.57µm
+±0.18µm	-0.070
+±0.002	-0.051
+±0.001	92.980%
+±0.157%	113.342%
+±2.528%	143.74µm
+±0.62µm	142.61µm
+±0.39µm	80.45µm
+±0.09µm	136.10µm
+±0.30µm	-0.057
+±0.010	-0.074
+±0.016	11.777%
+±0.037%	3.515%
+±0.080%	30.840µm	33.070µm

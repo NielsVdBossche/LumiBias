@@ -39,7 +39,7 @@ def vdmScanSim(pdf, beamParameters, beamPos, scaling, axis=0):
 
     totalEventYield = np.sum(eventYield)
     # single gauss als first guess + force fit to be at 0 centered
-    DGParam, cov = optimize.curve_fit(pdfs.oneDimDoubleGauss, beamPos[:, axis], eventYield / totalEventYield, bounds=((-0.00001, 1.5, -0.00001, 1.5, 0.), (0.00001, 30., 0.00001, 30., 1.)))
+    DGParam, cov = optimize.curve_fit(pdfs.oneDimDoubleGauss, beamPos[:, axis], eventYield / totalEventYield, p0=(0., 2.5, 0., 25., 0.5), bounds=((-0.00001, 1.5, -0.00001, 1.5, 0.), (0.00001, 30., 0.00001, 30., 1.)))
     vdmPredicted = pdfs.oneDimDoubleGauss(beamPos[:, axis], DGParam[0], DGParam[1], DGParam[2], DGParam[3], DGParam[4])
     width = 1 / (( (DGParam[4] / DGParam[1]) + ((1-DGParam[4]) / DGParam[3]) ))
 
